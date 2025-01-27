@@ -152,3 +152,6 @@ For questions or feedback, feel free to reach out:
 ---
 
 Enjoy decoding with **Decodify**! 🚀
+
+
+**Repository Views** ![Views](https://profile-counter.glitch.me/decodify/count.svg)
