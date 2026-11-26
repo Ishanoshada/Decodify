@@ -1,157 +1,108 @@
 # Decodify
 
-**Decodify** is a Python package designed to detect and decode messages encoded with various algorithms. It supports multiple encoding schemes and provides a simple interface for decoding messages directly or from files.
+**Decodify** is a Python package that detects and decodes (or encodes) messages using **29 classic and modern** encodings and ciphers. It provides both a simple Python API and a command-line interface.
 
 ---
 
 ## Features
 
-- **Multiple Encoding Algorithms**: Supports Base64, Hexadecimal, URL Encoding, Binary, and Morse Code.
-- **Automatic Detection**: Detects the encoding algorithm used in a message.
-- **Command-Line Interface (CLI)**: Decode messages directly from the terminal or from files.
-- **File Support**: Decode messages stored in files and save the output to a file.
-
----
-
-## Installation
-
-You can install `decodify` using `pip`:
-
-```bash
-pip install decodify
-```
-
----
-
-## Usage
-
-### Python API
-
-You can use the `decodify` package in your Python code to decode messages.
-
-```python
-from decodify import decode_message
-
-# Decode a Base64 encoded message
-encoded_message = "aGVsbG8="
-decoded, probabilities = decode_message(encoded_message)
-
-print(f"Decoded Message: {decoded}")
-print(f"Algorithm Probabilities: {probabilities}")
-```
-
-### Command-Line Interface (CLI)
-
-You can use the `decodify` CLI to decode messages directly from the terminal.
-
-#### Decode a Message
-
-```bash
-decodify "aGVsbG8="
-```
-
-#### Decode a Message from a File
-
-```bash
-decodify encoded.txt -f
-```
-
-#### Specify an Algorithm
-
-```bash
-decodify "aGVsbG8=" --algorithm base64
-```
-
-#### Save the Decoded Message to a File
-
-```bash
-decodify "aGVsbG8=" --output decoded.txt
-```
+- **29 algorithms** covering base encodings, web/text encodings, classical ciphers, and historical specialty codes
+- **Automatic detection** with priority for distinctive formats
+- **Encode + decode** round-trip support for every algorithm
+- **Keyed ciphers** (Caesar, Vigenère, XOR, Affine, Rail Fence) accept keys/shifts via API or CLI
+- **CLI** with file I/O, algorithm forcing, and encoding mode
 
 ---
 
 ## Supported Algorithms
 
-| Algorithm     | Description                                                                 |
-|---------------|-----------------------------------------------------------------------------|
-| **Base64**    | Decodes Base64 encoded strings.                                             |
-| **Hexadecimal** | Decodes hexadecimal encoded strings.                                       |
-| **URL Encoding** | Decodes URL-encoded strings (e.g., `hello%20world` → `hello world`).       |
-| **Binary**    | Decodes binary encoded strings (e.g., `01101000 01100101` → `he`).          |
-| **Morse Code** | Decodes Morse code strings (e.g., `.... . .-.. .-.. ---` → `HELLO`).       |
+| Category | Algorithms |
+|----------|------------|
+| **Base encodings** | `base64`, `base32`, `base58`, `base85` (Ascii85), `base45` (RFC 9285), `base36`, `hex`, `binary` |
+| **Text / web** | `url`, `quoted_printable`, `html_entities`, `unicode_escape`, `punycode`, `jwt` (header+payload) |
+| **Classical ciphers** | `rot13`, `rot47`, `caesar`, `atbash`, `vigenere`, `rail_fence`, `affine`, `xor` |
+| **Historical / specialty** | `morse`, `baconian`, `polybius`, `tap_code`, `nato`, `uuencode`, `brainfuck` |
 
 ---
 
-## Examples
+## Installation
 
-### Decoding a Base64 Message
+```bash
+pip install -e .
+# or
+pip install decodify
+```
+
+---
+
+## Quick Start (Python)
 
 ```python
-from decodify import decode_message
+from decodify import decode_message, encode_message, list_algorithms
 
-encoded_message = "aGVsbG8="
-decoded, probabilities = decode_message(encoded_message)
+# Auto-detect + decode
+text, probs = decode_message("SGVsbG8=")
+print(text)          # Hello
+print(probs)         # {'base64': 1.0, ...}
 
-print(f"Decoded Message: {decoded}")
-# Output: Decoded Message: hello
-print(f"Algorithm Probabilities: {probabilities}")
-# Output: Algorithm Probabilities: {'base64': 1.0, ...}
+# Force algorithm
+text, _ = decode_message("Uryyb", algorithm="rot13")
+text, _ = decode_message("...", algorithm="vigenere", key="LEMON")
+text, _ = decode_message("...", algorithm="caesar", shift=13)
+
+# Encode
+print(encode_message("Hello World", "base64"))
+print(encode_message("SOS", "nato"))
+print(encode_message("Attack at dawn", "caesar", shift=4))
+print(encode_message("secret", "xor", key="key"))
+
+print(list_algorithms())
 ```
 
-### Decoding from a File
+---
+
+## CLI
 
 ```bash
-decodify encoded.txt -f
+# Auto-detect
+decodify "SGVsbG8="
+
+# Force algorithm
+decodify -a base64 "SGVsbG8="
+decodify -a morse ".... . .-.. .-.. ---"
+decodify -a caesar --shift 13 "Uryyb"
+decodify -a vigenere --key SECRET "ciphertext"
+
+# Encode
+decodify -e -a base64 "Hello World"
+decodify -e -a nato "HELP"
+
+# Files
+decodify -f encoded.txt -o decoded.txt
+
+# List all algorithms
+decodify --list
 ```
 
-### Saving Decoded Output to a File
+---
 
-```bash
-decodify "aGVsbG8=" --output decoded.txt
-```
+## Notes on detection
+
+Detection is heuristic. Distinctive formats (JWT, uuencode, Brainfuck, Tap code, Morse, NATO, Baconian, Polybius, Base45/58/85, etc.) are preferred. Ambiguous classical ciphers (Caesar, Vigenère, ROT, XOR, Affine, Rail Fence) are **not** auto-detected — pass `-a` / `algorithm=` explicitly together with the key/shift when needed.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
+MIT
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute, please follow these steps:
+Contributions welcome — add new algorithms under `decodify/algorithms/` following the `is_X` / `decode_X` / `encode_X` pattern and register them in `algorithms/__init__.py`.
 
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes.
-4. Submit a pull request.
+## Contact / Original author
 
----
-
-## Issues
-
-If you encounter any issues or have suggestions for improvements, please open an issue on the [GitHub repository](https://github.com/ishanoshada/decodify).
-
----
-
-## Acknowledgments
-
-- Thanks to the Python community for creating amazing tools and libraries.
-- Special thanks to contributors who helped improve this package.
-
----
-
-## Contact
-
-For questions or feedback, feel free to reach out:
-
-- **Email**: ishan.kodithuwakku.offical@gmail.com
-- **GitHub**: [ishanoshada](https://github.com/ishanoshada)
-
----
+- GitHub: [ishanoshada](https://github.com/ishanoshada)
+- Repository: https://github.com/ishanoshada/decodify
 
 Enjoy decoding with **Decodify**! 🚀
-
-
-**Repository Views** ![Views](https://profile-counter.glitch.me/decodify/count.svg)
