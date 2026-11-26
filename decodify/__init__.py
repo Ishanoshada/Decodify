@@ -1,7 +1,12 @@
 
 # decodify/__init__.py
 
-from .decodify import Decodify
+from .decodify import (
+    Decodify,
+    decode_message,
+    encode_message,
+    list_algorithms,
+)
 
 # Expose convenience functions
 detect_algorithm = Decodify.detect_algorithm
