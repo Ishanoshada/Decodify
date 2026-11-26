@@ -32,7 +32,7 @@ jobs:
           pip install pytest anyio
           pip install -e .
 
-      - name: Run test suite
+      - name: Run tests
         run: python -m pytest tests/ -v
 
   deploy:
@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      contents: read
       id-token: write
 
     steps:
@@ -60,5 +61,5 @@ jobs:
       - name: Build package
         run: python -m build
 
-      - name: Publish package
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
